@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 // OTP generator
 const generateOtp = () => {
@@ -6,45 +6,29 @@ const generateOtp = () => {
 };
 
 /**
- * Creates Brevo SMTP transporter using LOGIN + PASSWORD mode
- * Why Brevo: More reliable than Gmail SMTP for production apps
- * Why LOGIN mode: Simpler than API-key mode, works without domain
+ * Uses Brevo Transactional API instead of SMTP
+ * Why API: More reliable than SMTP, better delivery rates
+ * Why not SMTP: Can have connection issues, slower
  */
-const createTransporter = () => {
-  // Validate required Brevo environment variables
-  if (!process.env.BREVO_SMTP_HOST || !process.env.BREVO_SMTP_PORT || 
-      !process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_PASS) {
-    throw new Error('Missing Brevo SMTP configuration');
-  }
-
-  return nodemailer.createTransport({
-    host: process.env.BREVO_SMTP_HOST,
-    port: Number(process.env.BREVO_SMTP_PORT),
-    secure: false, // Use STARTTLS
-    auth: {
-      user: process.env.BREVO_SMTP_USER,
-      pass: process.env.BREVO_SMTP_PASS
-    }
-  });
-};
-
 const sendOtpEmail = async (email, otp) => {
   console.log(`OTP request received for ${email}`);
   console.log(`Generated OTP: ${otp}`);
   
+  if (!process.env.BREVO_API_KEY) {
+    throw new Error('Missing BREVO_API_KEY configuration');
+  }
+  
   try {
-    const transporter = createTransporter();
-    
-    // Verify SMTP connection before sending
-    console.log('Verifying Brevo SMTP connection...');
-    await transporter.verify();
-    console.log('Brevo SMTP verified');
-    
-    const mailOptions = {
-      from: '"Willow" <creatusest1@gmail.com>', // Safe shared sender
-      to: email,
-      subject: 'Your Willow OTP Code',
-      html: `
+    const payload = {
+      sender: {
+        name: "Willow",
+        email: "creatusest1@gmail.com"
+      },
+      to: [{
+        email: email
+      }],
+      subject: "Your Willow OTP Code",
+      htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Willow Verification Code</h2>
           <p>Your OTP code is:</p>
@@ -57,19 +41,26 @@ const sendOtpEmail = async (email, otp) => {
       `
     };
     
-    const result = await transporter.sendMail(mailOptions);
+    console.log('Sending email via Brevo API...');
     
-    console.log(`Email sent: accepted=[${result.accepted.join(', ')}], rejected=[${result.rejected.join(', ')}]`);
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      payload,
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
     
-    if (result.rejected.length > 0) {
-      throw new Error(`Email rejected for: ${result.rejected.join(', ')}`);
-    }
+    console.log(`Email sent successfully: messageId=${response.data.messageId}`);
     
-    return { success: true, messageId: result.messageId };
+    return { success: true, messageId: response.data.messageId };
     
   } catch (error) {
-    console.error(`Email send failed for ${email}:`, error.message);
-    throw new Error(`Email delivery failed: ${error.message}`);
+    console.error(`Email send failed for ${email}:`, error.response?.data || error.message);
+    throw new Error(`Email delivery failed: ${error.response?.data?.message || error.message}`);
   }
 };
 
