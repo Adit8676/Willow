@@ -17,7 +17,7 @@ const createTransporter = () => {
     throw new Error('Missing Brevo SMTP configuration');
   }
 
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: process.env.BREVO_SMTP_HOST,
     port: Number(process.env.BREVO_SMTP_PORT),
     secure: false, // Use STARTTLS
