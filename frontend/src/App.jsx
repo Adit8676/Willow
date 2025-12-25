@@ -8,7 +8,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DiscoverPage from "./pages/DiscoverPage";
 import LandingPage from "./pages/LandingPage";
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useEffect } from "react";
@@ -19,12 +19,18 @@ import { Toaster } from "react-hot-toast";
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
+  const location = useLocation();
 
   console.log({ onlineUsers });
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    if (
+      location.pathname !== "/signup" &&
+      location.pathname !== "/verify-otp"
+    ) {
+      checkAuth();
+    }
+  }, [location.pathname, checkAuth]);
 
   console.log({ authUser });
 
