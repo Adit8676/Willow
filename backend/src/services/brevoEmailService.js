@@ -6,9 +6,9 @@ const generateOtp = () => {
 };
 
 /**
- * Creates Brevo SMTP transporter
+ * Creates Brevo SMTP transporter using LOGIN + PASSWORD mode
  * Why Brevo: More reliable than Gmail SMTP for production apps
- * Why not Gmail: Requires app passwords, has stricter rate limits
+ * Why LOGIN mode: Simpler than API-key mode, works without domain
  */
 const createTransporter = () => {
   // Validate required Brevo environment variables
@@ -19,24 +19,29 @@ const createTransporter = () => {
 
   return nodemailer.createTransporter({
     host: process.env.BREVO_SMTP_HOST,
-    port: parseInt(process.env.BREVO_SMTP_PORT),
+    port: Number(process.env.BREVO_SMTP_PORT),
     secure: false, // Use STARTTLS
     auth: {
       user: process.env.BREVO_SMTP_USER,
       pass: process.env.BREVO_SMTP_PASS
-    },
-    timeout: 30000
+    }
   });
 };
 
 const sendOtpEmail = async (email, otp) => {
-  console.log(`📧 Attempting to send OTP to: ${email}`);
+  console.log(`OTP request received for ${email}`);
+  console.log(`Generated OTP: ${otp}`);
   
   try {
     const transporter = createTransporter();
     
+    // Verify SMTP connection before sending
+    console.log('Verifying Brevo SMTP connection...');
+    await transporter.verify();
+    console.log('Brevo SMTP verified');
+    
     const mailOptions = {
-      from: 'Willow <no-reply@brevo.com>', // Safe sender address
+      from: 'Willow <no-reply@brevo.com>', // Safe shared sender
       to: email,
       subject: 'Your Willow OTP Code',
       html: `
@@ -54,16 +59,16 @@ const sendOtpEmail = async (email, otp) => {
     
     const result = await transporter.sendMail(mailOptions);
     
-    console.log(`✅ Email sent successfully to ${email}:`, {
-      messageId: result.messageId,
-      accepted: result.accepted,
-      rejected: result.rejected
-    });
+    console.log(`Email sent: accepted=[${result.accepted.join(', ')}], rejected=[${result.rejected.join(', ')}]`);
+    
+    if (result.rejected.length > 0) {
+      throw new Error(`Email rejected for: ${result.rejected.join(', ')}`);
+    }
     
     return { success: true, messageId: result.messageId };
     
   } catch (error) {
-    console.error(`❌ Email send failed for ${email}:`, error.message);
+    console.error(`Email send failed for ${email}:`, error.message);
     throw new Error(`Email delivery failed: ${error.message}`);
   }
 };
