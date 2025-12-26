@@ -20,43 +20,43 @@ A modern realtime chat application built with MERN stack featuring advanced AI-p
 ## Willow Walkthrough
 
 ### Welcome Landing Page
-![Landing Page](backend/public/screenshots/s1.png)
+![Landing Page](backend/public/screenshots/S1.png)
 *Clean and modern landing page showcasing Willow's core features and benefits*
 
 ### Account Registration
-![Create Account](backend/public/screenshots/s2.png)
+![Create Account](backend/public/screenshots/S2.png)
 *Streamlined signup process with email validation and secure authentication*
 
 ### Email OTP Verification
-![OTP Verification](backend/public/screenshots/s3.png)
+![OTP Verification](backend/public/screenshots/S3.png)
 *Two-factor authentication ensuring account security with email-based OTP*
 
 ### Profile Customization
-![Profile Setup](backend/public/screenshots/s4.png)
+![Profile Setup](backend/public/screenshots/S4.png)
 *Personalize your profile with custom avatars and personal information*
 
 ### Friend Discovery
-![Discover Friends](backend/public/screenshots/s5.png)
+![Discover Friends](backend/public/screenshots/S5.png)
 *Find and connect with users through intelligent search and friend requests*
 
 ### AI-Powered Content Moderation
-![Chat Moderation](backend/public/screenshots/s6.png)
+![Chat Moderation](backend/public/screenshots/S6.png)
 *Real-time message filtering with AI suggestions for safer communication*
 
 ### Rich Media Messaging
-![Chat Interface](backend/public/screenshots/s7.png)
+![Chat Interface](backend/public/screenshots/S7.png)
 *Support for text messages, images, and multimedia content sharing*
 
 ### AI Chat Assistant
-![AI Assistance](backend/public/screenshots/s8.png)
+![AI Assistance](backend/public/screenshots/S8.png)
 *Integrated AI assistant for enhanced user experience and support*
 
 ### Internationalization & UI Customization
-![Language Options](backend/public/screenshots/s9.png)
+![Language Options](backend/public/screenshots/S9.png)
 *Dynamic UI adaptation featuring multi-language support and 30+ customizable themes*
 
 ### Hindi Language Interface
-![Hindi UI](backend/public/screenshots/s10.png)
+![Hindi UI](backend/public/screenshots/S10.png)
 *Complete Hindi language support with native UI elements and cultural localization*
 
 ## Architecture Overview
