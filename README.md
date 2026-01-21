@@ -1,10 +1,10 @@
 # Willow - Safe chat starts here
 
-A modern realtime chat application built with MERN stack featuring advanced AI-powered content moderation, friend request system, and comprehensive user management.
+A modern realtime chat application built with MERN stack featuring advanced ML-based toxicity detection with AI-powered content rephrasing, friend request system, and comprehensive user management.
 
 **Live Demo**: [Try Willow Now](https://willow-3osi.onrender.com/)
 
-**Video Demo**: [Watch Now](https://youtu.be/zHzSBQuv7fI)
+**WillowAPI**: [Try It](https://willowapi-lj3e.onrender.com/)
 
 ## Features
 
@@ -12,84 +12,36 @@ A modern realtime chat application built with MERN stack featuring advanced AI-p
 - **Authentication**: JWT-based auth with email OTP verification
 - **Real-time Messaging**: Socket.io powered instant communication
 - **Friend Request System**: Complete user discovery and friend management
-- **AI Content Moderation**: Multi-provider toxicity detection and message filtering
-- **Smart Filtering**: Fallback protection with rule-based filtering
+- **Group Chat**: Create groups, join via QR codes, real-time group messaging
+- **ML-Powered Moderation**: TF-IDF + Logistic Regression toxicity detection with AI rephrasing
+- **Admin Dashboard**: Real-time monitoring, user management, and analytics
 - **User Status**: Online/offline status tracking
-- **State Management**: Zustand for global state
-- **Error Handling**: Comprehensive error handling on client and server
 - **Production Ready**: Optimized for deployment
 
-## Willow Walkthrough
+## Admin Dashboard
 
-### Welcome Landing Page
-<img src="backend/public/screenshots/S1.png"
-     alt="Landing Page"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
+### Access
+- **URL**: `/admin` (auto-redirect after login)
+- **Email**: admin@willow.in
+- **Password**: Willow@17
 
-*Clean and modern landing page showcasing Willow's core features and benefits*
+### Features
+- **Real-time Statistics**: Users, messages, moderation metrics with date range filtering
+- **Interactive Charts**: User growth, status distribution, moderation activity
+- **User Management**: Search, filter, block/unblock users with reasons
+- **Bulk Operations**: Select and manage up to 100 users at once
+- **Moderation Logs**: View all moderation events with filters
+- **Export Reports**: CSV exports for users, blocked users, and moderation logs
+- **Toxic Tracking**: Automatic toxic message counting and reset functionality
 
-### Account Registration
-<img src="backend/public/screenshots/S2.png"
-     alt="Account Registration"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
+### Setup Admin
+```bash
+cd backend
+node src/seeds/admin.seed.js
+node src/seeds/migrate-users.js
+```
 
-*Streamlined signup process with email validation and secure authentication*
-
-### Email OTP Verification
-<img src="backend/public/screenshots/S3.png"
-     alt="OTP Verification"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Two-factor authentication ensuring account security with email-based OTP*
-
-### Profile Customization
-<img src="backend/public/screenshots/S4.png"
-     alt="Profile Setup"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Personalize your profile with custom avatars and personal information*
-
-### Friend Discovery
-<img src="backend/public/screenshots/S5.png"
-     alt="Friend Discovery"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Find and connect with users through intelligent search and friend requests*
-
-### AI-Powered Content Moderation
-<img src="backend/public/screenshots/S6.png"
-     alt="AI Content Moderation"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Real-time message filtering with AI suggestions for safer communication*
-
-### Rich Media Messaging
-<img src="backend/public/screenshots/S7.png"
-     alt="Rich Media Messaging"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Support for text messages, images, and multimedia content sharing*
-
-### AI Chat Assistant
-<img src="backend/public/screenshots/S8.png"
-     alt="AI Chat Assistant"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Integrated AI assistant for enhanced user experience and support*
-
-### Internationalization & UI Customization
-<img src="backend/public/screenshots/S9.png"
-     alt="UI Customization"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Dynamic UI adaptation featuring multi-language support and 30+ customizable themes*
-
-### Hindi Language Interface
-<img src="backend/public/screenshots/S10.png"
-     alt="Hindi Interface"
-     style="border:2px solid #d0d7de; border-radius:10px; margin:12px 0;" />
-
-*Complete Hindi language support with native UI elements and cultural localization*
+See [ADMIN_DASHBOARD.md](ADMIN_DASHBOARD.md) for detailed documentation.
 
 ## Architecture Overview
 
@@ -168,15 +120,85 @@ GET /api/users/search?q=username
 - `friend:request_update` - Request status changed
 - `friends:list_updated` - Friend list modified
 
+## Group Chat System
+
+### Core Features
+- **Group Creation**: Create groups with custom names and avatars
+- **QR Code Joining**: Generate QR codes for easy group joining
+- **Real-time Messaging**: Instant group communication via Socket.io
+- **Role Management**: Owner/Admin/Member permissions
+- **AI Moderation**: Same moderation pipeline as private messages
+- **Member Management**: Add/remove members, leave groups
+
+### Group Chat Workflow
+1. User creates group with name and optional avatar
+2. System generates unique 8-character join code
+3. QR code generated for easy sharing
+4. Members join via code or QR scan
+5. Real-time messaging with full moderation
+
+### API Endpoints
+
+```bash
+# Create group
+POST /api/groups
+Content-Type: application/json
+{
+  "name": "My Group",
+  "avatar": "base64_image_data"
+}
+
+# Join group
+POST /api/groups/join
+Content-Type: application/json
+{
+  "joinCode": "ABC12345"
+}
+
+# Get user's groups
+GET /api/groups/me
+
+# Get group messages
+GET /api/groups/:id/messages
+
+# Get QR code
+GET /api/groups/:id/qr
+
+# Leave group
+POST /api/groups/:id/leave
+```
+
+### Socket Events
+- `group:join` - Join group room
+- `group:leave` - Leave group room
+- `group:message:send` - Send group message
+- `group:newMessage` - New message received
+- `group:message:blocked` - Message blocked by moderation
+- `group:member_joined` - New member joined
+- `group:member_left` - Member left group
+
 ## AI Moderation System
 
 ### Moderation Pipeline
 1. **Message Interception**: All messages analyzed before delivery
-2. **Multi-Provider Detection**: Gemini, Groq, and Grok API integration
-3. **Toxicity Analysis**: Advanced AI models detect harmful content
-4. **Smart Rephrasing**: Suggests alternative phrasing for flagged content
-5. **Fallback Protection**: Rule-based filtering when AI services unavailable
-6. **Audit Logging**: Complete moderation event tracking
+2. **ML Toxicity Detection**: TF-IDF based text representation with Logistic Regression classifier produces real-time toxicity probability scores (lightweight, fast, well-suited for live chat)
+3. **Agentic AI Rephrasing**: Gemini and Grok APIs intelligently rephrase toxic content while preserving intent
+4. **Multi-Provider Fallback**: Groq API as secondary rephrasing service
+5. **Image Moderation**: OCR text extraction from images with AI analysis
+6. **Rule-based Protection**: Keyword filtering when AI services unavailable
+7. **Audit Logging**: Complete moderation event tracking
+
+### How It Works
+- **Detection**: Machine learning model (TF-IDF + Logistic Regression) analyzes text and returns toxicity probability
+- **Rephrasing**: If toxic, agentic AI services (Gemini/Grok) rewrite the message to be constructive
+- **Delivery**: Clean or rephrased messages delivered in real-time via Socket.io
+
+### Image Moderation Features
+- **OCR Text Extraction**: Extracts text from uploaded images
+- **Round-Robin Key Usage**: Uses Gemini API keys in rotation for image moderation
+- **Automatic Cleanup**: Deletes blocked images from Cloudinary
+- **Fail-Open Policy**: Allows images when moderation services are unavailable
+- **Minimum Text Threshold**: Only moderates images with 3+ characters of text
 
 ### Socket Events
 - `send_message` - Client sends message for moderation
@@ -185,13 +207,38 @@ GET /api/users/search?q=username
 - `message_sent` - Message delivery confirmation
 - `message_error` - Error handling for failed processing
 
+## WillowAPI - Content Moderation Platform
+
+Willow's moderation system is powered by **WillowAPI**, a standalone AI-powered content moderation platform with comprehensive web dashboard.
+
+### Key Features
+- **Multi-Provider AI**: Gemini (primary), Groq (fallback), rule-based filtering
+- **Web Dashboard**: API key management, analytics, interactive documentation
+- **Production Ready**: JWT auth, rate limiting, comprehensive logging
+- **Live Demo**: [https://willowapi-lj3e.onrender.com/](https://willowapi-lj3e.onrender.com/)
+- **Repository**: [https://github.com/Shivansh11956/WillowAPI](https://github.com/Shivansh11956/WillowAPI)
+
+### Integration
+Willow uses WillowAPI's moderation endpoint for real-time content filtering:
+```bash
+POST /api/v1/moderate
+Authorization: Bearer <api_key>
+Content-Type: application/json
+
+{
+  "text": "Message to moderate",
+  "userId": "optional_user_id",
+  "conversationId": "optional_conversation_id"
+}
+```
+
 ## Environment Configuration
 
 ### Required Environment Variables
 
 ```bash
 # Database & Server
-MONGODB_URI=mongodb://localhost:27017/willow
+MONGODB_URI=your_mongodb_connection_string
 PORT=5001
 JWT_SECRET=your_jwt_secret_key
 
@@ -201,13 +248,16 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
 # AI Moderation APIs
-GEMINI_KEY_1=AIzaSyAAA...
-GEMINI_KEY_2=AIzaSyBBB...
-GEMINI_KEY_3=AIzaSyCCC...
-GEMINI_API_KEY=AIzaSyAAA...
-GROK_API_KEY=gsk_your_grok_key
-GROQ_API_KEY=gsk_your_groq_key
+GEMINI_KEY_1=your_gemini_key_1
+GEMINI_KEY_2=your_gemini_key_2
+GEMINI_KEY_3=your_gemini_key_3
+GEMINI_API_KEY=your_primary_gemini_key
+GROK_API_KEY=your_grok_key
+GROQ_API_KEY=your_groq_key
 GROQ_API_URL=https://api.groq.com/openai/v1/chat/completions
+
+# Image Moderation (OCR)
+OCR_API_KEY=your_ocr_api_key
 
 # Email Authentication (Brevo)
 BREVO_API_KEY=your_brevo_api_key
@@ -218,27 +268,12 @@ NODE_ENV=production
 ```
 
 ### API Key Setup
-
-**Google Gemini API Keys**
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create multiple API keys for load balancing
-3. Add keys as GEMINI_KEY_1, GEMINI_KEY_2, etc.
-
-**Groq API Key**
-1. Go to [Groq Console](https://console.groq.com/keys)
-2. Generate new API key
-3. Set as GROQ_API_KEY
-
-**Grok API Key**
-1. Access [xAI Console](https://console.x.ai)
-2. Create API key for Grok integration
-3. Set as GROK_API_KEY
-
-**Brevo Email Configuration**
-1. Create account at [Brevo](https://www.brevo.com)
-2. Generate API key from account settings
-3. Verify sender email domain
-4. Set BREVO_API_KEY, BREVO_SENDER_EMAIL, and BREVO_SENDER_NAME
+Get API keys from:
+- [Google AI Studio](https://makersuite.google.com/app/apikey) - Gemini AI
+- [Groq Console](https://console.groq.com/keys) - Groq AI
+- [xAI Console](https://console.x.ai) - Grok AI
+- [Brevo](https://www.brevo.com) - Email service
+- [OCR.space](https://ocr.space/ocrapi) - OCR API
 
 ## Installation & Setup
 
@@ -268,92 +303,62 @@ cd frontend && npm run dev
 npm start
 ```
 
-## Testing
+## Health Check
+Visit `http://localhost:5001/health` to verify database connectivity and AI API status.
 
-### AI Moderation Testing
-```bash
-cd backend
-node test-moderation.js
-```
 
-### Email OTP Testing
-```bash
-curl -X POST http://localhost:5001/api/auth/send-otp \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com"}'
-```
-
-### Health Check
-Visit `http://localhost:5001/health` to verify:
-- Database connectivity
-- AI API configuration status
-- System health metrics
-
-## Database Models
-
-### User Model
-- Profile information and authentication data
-- Friend relationships and status
-- Account settings and preferences
-
-### Message Model
-- Chat message content and metadata
-- Sender/receiver information
-- Timestamps and delivery status
-
-### Friend Request Model
-- Request status and lifecycle tracking
-- Sender/recipient relationship data
-- Request messages and timestamps
-
-### Moderation Log Model
-- AI moderation event tracking
-- Toxicity scores and actions taken
-- Original content and suggested alternatives
 
 ## Deployment
 
 ### Supported Platforms
-- Heroku
-- Railway
-- Vercel
-- Netlify
-- AWS Amplify
-- DigitalOcean App Platform
+Render, Railway, Heroku, Vercel, AWS Amplify, DigitalOcean
 
-### Deployment Steps
-1. Set up environment variables in platform dashboard
-2. Configure build commands: `npm run build`
-3. Set start command: `npm start`
-4. Deploy from GitHub repository (private repos supported)
+### Quick Deploy to Render
+1. Fork/clone repository to GitHub
+2. Connect repository to Render
+3. Set environment variables in Render dashboard
+4. Deploy automatically on push
 
-### Production Considerations
-- Enable MongoDB Atlas for database hosting
-- Configure CORS for production domains
-- Set up SSL certificates
-- Monitor AI API usage and quotas
-- Implement proper logging and monitoring
+### Production Checklist
+- Use MongoDB Atlas for database
+- Configure CORS for your domain
+- Set up SSL certificates (automatic on Render)
+- Monitor AI API quotas and rate limits
+- Set NODE_ENV=production
+- Configure admin account via seed scripts
+- Test health endpoint: `/health`
 
 ## Troubleshooting
 
 **AI Service Failures**
 - Application automatically falls back to rule-based filtering
 - Check `/health` endpoint for API status
-- Verify API keys and quotas
+- Verify API keys are valid and have quota remaining
 
 **Connection Issues**
-- Ensure correct port configuration
-- Check firewall settings
+- Ensure correct port configuration (default: 5001)
+- Check firewall settings for WebSocket connections
 - Verify Socket.io connection parameters
+- Check CORS configuration for your domain
 
 **Database Problems**
-- Confirm MongoDB connection string
-- Check database permissions
+- Confirm MongoDB connection string format
+- Check database permissions and network access
 - Monitor connection pool status
+- Verify MongoDB Atlas IP whitelist settings
 
 **Email Delivery**
 - Verify Brevo API key is valid
 - Check spam folders for OTP emails
-- Ensure sender email is verified in Brevo
-- Monitor Brevo dashboard for delivery status
+- Ensure sender email is verified in Brevo dashboard
+- Monitor Brevo dashboard for delivery status and errors
 
+**Moderation Issues**
+- ML model runs locally (no external dependencies)
+- AI rephrasing requires valid Gemini/Grok API keys
+- Check moderation logs in admin dashboard
+- Verify toxicity threshold settings
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
