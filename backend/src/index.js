@@ -64,6 +64,9 @@ app.use("/api/block", blockRoutes);
 
 if (process.env.NODE_ENV === "production") {
   const distPath = path.resolve(__dirname, "../../dist");
+  
+  console.log('Looking for dist at:', distPath);
+  
   app.use(express.static(distPath));
 
   app.get("*", (req, res) => {

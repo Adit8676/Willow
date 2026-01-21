@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "cd .. && npm install && npm install --prefix frontend && npm run build --prefix frontend && mkdir -p dist && cp -r frontend/dist/* dist/"
   },
   "keywords": [],
   "author": "",
