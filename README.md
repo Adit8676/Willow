@@ -307,7 +307,6 @@ npm start
 Visit `http://localhost:5001/health` to verify database connectivity and AI API status.
 
 
-
 ## Deployment
 
 ### Supported Platforms
