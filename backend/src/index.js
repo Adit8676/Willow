@@ -63,7 +63,7 @@ app.use("/api/moderation", moderationRoutes);
 app.use("/api/block", blockRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  const distPath = path.join(process.cwd(), "dist");
+  const distPath = path.join(__dirname, "../../dist");
   app.use(express.static(distPath));
 
   app.get("*", (req, res) => {
