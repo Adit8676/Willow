@@ -20,6 +20,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+    blockedReason: {
+      type: String,
+      default: "",
+    },
+    blockedAt: {
+      type: Date,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    toxicMessageCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

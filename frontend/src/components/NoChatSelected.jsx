@@ -39,9 +39,9 @@ const NoChatSelected = () => {
           </div>
 
           {/* AI Welcome Text */}
-          <h2 className="text-xl sm:text-2xl font-bold">Welcome to Willow</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">{t('welcomeToWillow')}</h2>
           <p className="text-sm sm:text-base text-base-content/60">
-            Choose an AI assistant to start chatting
+            {t('chooseAiAssistant')}
           </p>
         </div>
       </div>

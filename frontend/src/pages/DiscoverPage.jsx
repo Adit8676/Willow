@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useFriendStore } from '../store/useFriendStore.js';
 import FriendCard from '../components/FriendCard.jsx';
-import SidebarBanner from '../components/SidebarBanner.jsx';
+import SimpleSidebar from '../components/SimpleSidebar.jsx';
 import { Search, Users, UserPlus, Sparkles } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useNavigate } from 'react-router-dom';
@@ -110,13 +110,10 @@ const DiscoverPage = () => {
 
   return (
     <div className="h-screen bg-base-200">
-      <div className="flex items-center justify-center pt-16 sm:pt-20 px-2 sm:px-4">
-        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-7xl laptop:max-w-8xl 3xl:max-w-9xl h-[calc(100vh-4rem)] sm:h-[calc(100vh-8rem)]">
+      <div className="flex items-center justify-center pt-16 sm:pt-20 px-2 sm:px-4 pb-2 sm:pb-4">
+        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-7xl laptop:max-w-8xl 3xl:max-w-9xl h-[calc(100vh-4.5rem)] sm:h-[calc(100vh-6rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
-            <SidebarBanner 
-              onChatClick={() => { openHumanChat(); navigate('/'); }}
-              onAiClick={() => { openAiPanel(); navigate('/'); }}
-            />
+            <SimpleSidebar />
             
             <div className="flex-1 overflow-y-auto p-6">
               <div className="max-w-7xl mx-auto">

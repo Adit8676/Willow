@@ -23,6 +23,14 @@ const messageSchema = new mongoose.Schema(
       enum: ['sent', 'delivered', 'read'],
       default: 'sent'
     },
+    deletedForEveryone: {
+      type: Boolean,
+      default: false
+    },
+    deletedFor: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }]
   },
   { timestamps: true }
 );

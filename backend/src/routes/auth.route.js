@@ -1,5 +1,5 @@
 const express = require('express');
-const { checkAuth, login, logout, signup, updateProfile, sendOtp, verifyOtp } = require('../controllers/auth.controller.js');
+const { checkAuth, login, logout, signup, updateProfile, sendOtp, verifyOtp, forgotPassword, resetPassword } = require('../controllers/auth.controller.js');
 const { protectRoute } = require('../middleware/auth.middleware.js');
 const { sendOtpEmail, generateOtp } = require('../services/brevoEmailService.js');
 
@@ -10,6 +10,8 @@ router.post("/login", login);
 router.post("/logout", logout);
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 // Test route for email functionality
 router.get("/test-email", async (req, res) => {

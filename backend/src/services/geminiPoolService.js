@@ -5,6 +5,7 @@ const keys = [];
 const meta = [];
 let lastUsedIndex = -1;
 let lastResetDate = null;
+let isInitialized = false;
 
 // Load GEMINI_KEY_* from process.env
 function loadGeminiKeys() {
@@ -20,6 +21,12 @@ function loadGeminiKeys() {
       }
     }
   });
+  
+  // Set random start index on first load
+  if (!isInitialized && keys.length > 0) {
+    lastUsedIndex = Math.floor(Math.random() * keys.length) - 1;
+    isInitialized = true;
+  }
 }
 
 // Reset daily counters if UTC date changed

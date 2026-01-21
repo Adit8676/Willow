@@ -1,5 +1,8 @@
 export const translations = {
   en: {
+    // App
+    appName: 'Willow',
+    
     // Navbar
     logout: 'Logout',
     
@@ -62,9 +65,25 @@ export const translations = {
     reject: 'Reject',
     welcomeToWillow: 'Welcome to Willow!',
     findPeopleConnect: 'Find people and send a request to connect',
+    chooseAiAssistant: 'Choose an AI assistant to start chatting',
+    
+    // Groups
+    groupChats: 'Group Chats',
+    createJoinGroups: 'Create or join group conversations with your friends',
+    createGroup: 'Create Group',
+    joinGroup: 'Join Group',
+    groupName: 'Group Name',
+    enterGroupName: 'Enter group name',
+    joinCode: 'Join Code',
+    enterJoinCode: 'Enter 8-character code',
+    create: 'Create',
+    join: 'Join',
   },
   
   hi: {
+    // App
+    appName: 'विलो',
+    
     // Navbar
     logout: 'लॉगआउट',
     
@@ -127,6 +146,19 @@ export const translations = {
     reject: 'अस्वीकार करें',
     welcomeToWillow: 'विलो में आपका स्वागत है!',
     findPeopleConnect: 'लोगों को खोजें और जुड़ने के लिए अनुरोध भेजें',
+    chooseAiAssistant: 'चैट शुरू करने के लिए एक AI सहायक चुनें',
+    
+    // Groups
+    groupChats: 'समूह चैट',
+    createJoinGroups: 'अपने मित्रों के साथ समूह बातचीत बनाएं या उनमें शामिल हों',
+    createGroup: 'समूह बनाएं',
+    joinGroup: 'समूह में शामिल हों',
+    groupName: 'समूह का नाम',
+    enterGroupName: 'समूह का नाम दर्ज करें',
+    joinCode: 'जॉइन कोड',
+    enterJoinCode: '8-अक्षर का कोड दर्ज करें',
+    create: 'बनाएं',
+    join: 'शामिल हों',
   }
 };
 

@@ -10,7 +10,7 @@ const generateOtp = () => {
  * Why API: More reliable than SMTP, better delivery rates
  * Why not SMTP: Can have connection issues, slower
  */
-const sendOtpEmail = async (email, otp) => {
+const sendOtpEmail = async (email, otp, type = 'signup') => {
   console.log(`OTP request received for ${email}`);
   console.log(`Generated OTP: ${otp}`);
   
@@ -18,6 +18,8 @@ const sendOtpEmail = async (email, otp) => {
     console.error('Missing BREVO_API_KEY');
     throw new Error('Missing BREVO_API_KEY configuration');
   }
+  
+  const isPasswordReset = type === 'password_reset';
   
   try {
     const payload = {
@@ -28,16 +30,16 @@ const sendOtpEmail = async (email, otp) => {
       to: [{
         email: email
       }],
-      subject: "Your Willow OTP Code",
+      subject: isPasswordReset ? "Reset Your Willow Password" : "Your Willow OTP Code",
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Willow Verification Code</h2>
-          <p>Your OTP code is:</p>
+          <h2 style="color: #333;">${isPasswordReset ? 'Password Reset Request' : 'Willow Verification Code'}</h2>
+          <p>${isPasswordReset ? 'You requested to reset your password. Use this code:' : 'Your OTP code is:'}</p>
           <div style="background: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 3px; margin: 20px 0;">
             ${otp}
           </div>
           <p style="color: #666;">This code expires in 15 minutes.</p>
-          <p style="color: #666; font-size: 12px;">If you didn't request this code, please ignore this email.</p>
+          <p style="color: #666; font-size: 12px;">${isPasswordReset ? 'If you didn\'t request a password reset, please ignore this email.' : 'If you didn\'t request this code, please ignore this email.'}</p>
         </div>
       `
     };

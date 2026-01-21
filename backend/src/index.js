@@ -8,6 +8,10 @@ const authRoutes = require('./routes/auth.route.js');
 const messageRoutes = require('./routes/message.route.js');
 const aiRoutes = require('./routes/ai.route.js');
 const friendRoutes = require('./routes/friend.route.js');
+const groupRoutes = require('./routes/group.routes.js');
+const adminRoutes = require('./routes/admin.route.js');
+const moderationRoutes = require('./routes/moderation.route.js');
+const blockRoutes = require('./routes/block.route.js');
 const { app, server } = require('./lib/socket.js');
 
 dotenv.config();
@@ -53,6 +57,10 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/users", friendRoutes);
+app.use("/api/groups", groupRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/moderation", moderationRoutes);
+app.use("/api/block", blockRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../public")));
