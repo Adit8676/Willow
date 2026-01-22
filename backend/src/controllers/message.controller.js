@@ -1,6 +1,7 @@
 const User = require('../models/user.model.js');
 const Message = require('../models/message.model.js');
 const ModerationLog = require('../models/moderationLog.model.js');
+const BlockedMessage = require('../models/blockedMessage.model.js');
 const cloudinary = require('../lib/cloudinary.js');
 const { getReceiverSocketId, io } = require('../lib/socket.js');
 const { moderateWithGemini } = require('../services/geminiPoolService');
@@ -137,16 +138,28 @@ const sendMessage = async (req, res) => {
           console.log(`BLOCK uid=${uid} decision=BLOCK`);
           
           // Log moderation and increment toxic count
-          await ModerationLog.create({
-            senderId,
-            receiverId,
-            originalMessage: req.body.text,
-            action: 'blocked',
-            reason: 'Inappropriate language detected',
-            moderationMethod: 'gemini',
-            messageType: 'private'
-          });
-          await User.findByIdAndUpdate(senderId, { $inc: { toxicMessageCount: 1 } });
+          console.log('[MODERATION] Creating BLOCKED log entry');
+          await Promise.all([
+            ModerationLog.create({
+              senderId,
+              receiverId,
+              originalMessage: req.body.text,
+              action: 'blocked',
+              reason: 'Inappropriate language detected',
+              moderationMethod: 'gemini',
+              messageType: 'private'
+            }),
+            BlockedMessage.create({
+              senderId,
+              receiverId,
+              originalMessage: req.body.text,
+              reason: 'Inappropriate language detected',
+              moderationMethod: 'gemini',
+              messageType: 'private'
+            }),
+            User.findByIdAndUpdate(senderId, { $inc: { toxicMessageCount: 1 } })
+          ]);
+          console.log('[MODERATION] BLOCKED log created successfully');
           
           return res.status(400).json({
             error: "This message was blocked due to inappropriate language. Kindly communicate respectfully."
@@ -156,6 +169,7 @@ const sendMessage = async (req, res) => {
         text = geminiResult.text;
         if (text !== req.body.text) {
           console.log(`REWRITE_GEMINI key=${geminiResult.keyIndex} uid=${uid} decision=REWRITE`);
+          console.log('[MODERATION] Creating REPHRASED log entry');
           await ModerationLog.create({
             senderId,
             receiverId,
@@ -165,8 +179,10 @@ const sendMessage = async (req, res) => {
             moderationMethod: 'gemini',
             messageType: 'private'
           });
+          console.log('[MODERATION] REPHRASED log created successfully');
         } else {
           console.log(`SAFE uid=${uid} decision=SAFE`);
+          console.log('[MODERATION] Creating ALLOWED log entry');
           await ModerationLog.create({
             senderId,
             receiverId,
@@ -175,6 +191,7 @@ const sendMessage = async (req, res) => {
             moderationMethod: 'gemini',
             messageType: 'private'
           });
+          console.log('[MODERATION] ALLOWED log created successfully');
         }
       } else {
         // Stage 2: Fallback to Groq (3s timeout)
@@ -184,16 +201,26 @@ const sendMessage = async (req, res) => {
           if (groqResult.text === '<<BLOCK>>') {
             console.log(`BLOCK uid=${uid} decision=BLOCK`);
             
-            await ModerationLog.create({
-              senderId,
-              receiverId,
-              originalMessage: req.body.text,
-              action: 'blocked',
-              reason: 'Inappropriate language detected',
-              moderationMethod: 'groq',
-              messageType: 'private'
-            });
-            await User.findByIdAndUpdate(senderId, { $inc: { toxicMessageCount: 1 } });
+            await Promise.all([
+              ModerationLog.create({
+                senderId,
+                receiverId,
+                originalMessage: req.body.text,
+                action: 'blocked',
+                reason: 'Inappropriate language detected',
+                moderationMethod: 'groq',
+                messageType: 'private'
+              }),
+              BlockedMessage.create({
+                senderId,
+                receiverId,
+                originalMessage: req.body.text,
+                reason: 'Inappropriate language detected',
+                moderationMethod: 'groq',
+                messageType: 'private'
+              }),
+              User.findByIdAndUpdate(senderId, { $inc: { toxicMessageCount: 1 } })
+            ]);
             
             return res.status(400).json({
               error: "This message was blocked due to inappropriate language. Kindly communicate respectfully."

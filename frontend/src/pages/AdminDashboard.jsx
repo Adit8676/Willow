@@ -49,7 +49,7 @@ const AdminDashboard = () => {
   const [blockReason, setBlockReason] = useState('');
   const [viewUserDetails, setViewUserDetails] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
-  const [showModerationLogs, setShowModerationLogs] = useState(false);
+  const [showModerationLogs, setShowModerationLogs] = useState(true);
   const [moderationLogs, setModerationLogs] = useState([]);
   const [moderationPage, setModerationPage] = useState(1);
   const [moderationFilter, setModerationFilter] = useState('all');
@@ -92,6 +92,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (showModerationLogs) {
       fetchModerationLogs();
+      // Auto-refresh moderation logs every 10 seconds
+      const interval = setInterval(() => {
+        fetchModerationLogs();
+      }, 10000);
+      return () => clearInterval(interval);
     }
   }, [showModerationLogs, moderationPage, moderationFilter]);
 
@@ -144,6 +149,7 @@ const AdminDashboard = () => {
 
   const fetchModerationLogs = async () => {
     try {
+      console.log('[FRONTEND] Fetching moderation logs with filter:', moderationFilter);
       const { data } = await axiosInstance.get('/admin/moderation-logs', {
         params: { 
           page: moderationPage, 
@@ -151,6 +157,8 @@ const AdminDashboard = () => {
           filter: moderationFilter
         }
       });
+      console.log('[FRONTEND] Received logs:', data.logs?.length, 'Total:', data.pagination?.total);
+      console.log('[FRONTEND] First 3 logs:', data.logs?.slice(0, 3).map(l => ({ action: l.action, message: l.originalMessage?.substring(0, 20) })));
       setModerationLogs(data.logs || []);
       // Store pagination info if available
       if (data.pagination) {
@@ -813,16 +821,16 @@ const AdminDashboard = () => {
                         <td>
                           <span className={`badge ${
                             log.action === 'blocked' ? 'badge-error' :
-                            log.action === 'rephrased' ? 'badge-warning' :
+                            log.action === 'rephrased' || log.action === 'bypassed' ? 'badge-warning' :
                             'badge-success'
                           }`}>
-                            {log.action}
+                            {log.action === 'bypassed' ? 'rephrased' : log.action}
                           </span>
                         </td>
                         <td className="max-w-xs truncate" title={log.originalMessage}>
                           {log.action === 'blocked' 
                             ? log.originalMessage?.substring(0, 50) 
-                            : log.originalMessage?.replace(/./g, '*').substring(0, 50)
+                            : '*'.repeat(Math.min(log.originalMessage?.length || 0, 50))
                           }
                         </td>
                         <td>
@@ -1323,16 +1331,16 @@ const AdminDashboard = () => {
                         <td>
                           <span className={`badge badge-xs ${
                             log.action === 'blocked' ? 'badge-error' :
-                            log.action === 'rephrased' ? 'badge-warning' :
+                            log.action === 'rephrased' || log.action === 'bypassed' ? 'badge-warning' :
                             'badge-success'
                           }`}>
-                            {log.action}
+                            {log.action === 'bypassed' ? 'rephrased' : log.action}
                           </span>
                         </td>
                         <td className="max-w-xs truncate" title={log.originalMessage}>
                           {log.action === 'blocked' 
                             ? log.originalMessage?.substring(0, 30) 
-                            : log.originalMessage?.replace(/./g, '*').substring(0, 30)
+                            : '*'.repeat(Math.min(log.originalMessage?.length || 0, 30))
                           }
                         </td>
                         <td className="text-xs">{log.moderationMethod || 'unknown'}</td>

@@ -5,6 +5,7 @@ const { analyzeToxicity } = require('../services/toxicityService');
 const { rephraseMessage } = require('../services/rephraseService');
 const fallbackFilter = require('./fallbackFilter');
 const ModerationLog = require('../models/moderationLog.model');
+const BlockedMessage = require('../models/blockedMessage.model');
 const GroupMember = require('../models/groupMember.model');
 const GroupMessage = require('../models/groupMessage.model');
 const { moderateWithGemini } = require('../services/geminiPoolService');
@@ -168,6 +169,38 @@ io.on("connection", async (socket) => {
           $inc: { toxicMessageCount: 1 }
         });
         
+        // Log moderation event
+        console.log('[MODERATION] Creating blocked log for private message:', {
+          senderId: messageData.senderId,
+          receiverId: messageData.receiverId,
+          action: 'blocked',
+          method: 'ai'
+        });
+        await Promise.all([
+          ModerationLog.create({
+            senderId: messageData.senderId,
+            receiverId: messageData.receiverId,
+            originalMessage: messageData.text,
+            suggestedMessage: suggestion,
+            action: 'blocked',
+            reason: reason,
+            toxicityScore: toxicityResult.score,
+            moderationMethod: 'ai',
+            messageType: 'private'
+          }),
+          BlockedMessage.create({
+            senderId: messageData.senderId,
+            receiverId: messageData.receiverId,
+            originalMessage: messageData.text,
+            suggestedMessage: suggestion,
+            reason: reason,
+            toxicityScore: toxicityResult.score,
+            moderationMethod: 'ai',
+            messageType: 'private'
+          })
+        ]);
+        console.log('[MODERATION] Blocked log created successfully');
+        
         // Send blocked message ONLY to sender
         socket.emit('message_blocked', {
           original: messageData.text,
@@ -186,6 +219,37 @@ io.on("connection", async (socket) => {
         await User.findByIdAndUpdate(messageData.senderId, {
           $inc: { toxicMessageCount: 1 }
         });
+        
+        // Log moderation event
+        console.log('[MODERATION] Creating blocked log for private message (fallback):', {
+          senderId: messageData.senderId,
+          receiverId: messageData.receiverId,
+          action: 'blocked',
+          method: !toxicityResult.ok ? 'fallback' : 'fallback_secondary'
+        });
+        const moderationMethod = !toxicityResult.ok ? 'fallback' : 'fallback';
+        await Promise.all([
+          ModerationLog.create({
+            senderId: messageData.senderId,
+            receiverId: messageData.receiverId,
+            originalMessage: messageData.text,
+            suggestedMessage: fallback.sanitized,
+            action: 'blocked',
+            reason: fallback.reasons.join(', '),
+            moderationMethod: moderationMethod,
+            messageType: 'private'
+          }),
+          BlockedMessage.create({
+            senderId: messageData.senderId,
+            receiverId: messageData.receiverId,
+            originalMessage: messageData.text,
+            suggestedMessage: fallback.sanitized,
+            reason: fallback.reasons.join(', '),
+            moderationMethod: moderationMethod,
+            messageType: 'private'
+          })
+        ]);
+        console.log('[MODERATION] Blocked log created successfully (fallback)');
         
         socket.emit('message_blocked', {
           original: messageData.text,
@@ -298,15 +362,25 @@ io.on("connection", async (socket) => {
             wasBlocked = true;
             
             // Log moderation
-            await ModerationLog.create({
-              senderId,
-              groupId,
-              originalMessage: text,
-              action: 'blocked',
-              reason: 'Inappropriate language detected',
-              moderationMethod: 'gemini',
-              messageType: 'group'
-            });
+            await Promise.all([
+              ModerationLog.create({
+                senderId,
+                groupId,
+                originalMessage: text,
+                action: 'blocked',
+                reason: 'Inappropriate language detected',
+                moderationMethod: 'gemini',
+                messageType: 'group'
+              }),
+              BlockedMessage.create({
+                senderId,
+                groupId,
+                originalMessage: text,
+                reason: 'Inappropriate language detected',
+                moderationMethod: 'gemini',
+                messageType: 'group'
+              })
+            ]);
             
             // Increment toxic message count
             const User = require('../models/user.model');
@@ -357,15 +431,25 @@ io.on("connection", async (socket) => {
               wasBlocked = true;
               
               // Log moderation
-              await ModerationLog.create({
-                senderId,
-                groupId,
-                originalMessage: text,
-                action: 'blocked',
-                reason: 'Inappropriate language detected',
-                moderationMethod: 'groq',
-                messageType: 'group'
-              });
+              await Promise.all([
+                ModerationLog.create({
+                  senderId,
+                  groupId,
+                  originalMessage: text,
+                  action: 'blocked',
+                  reason: 'Inappropriate language detected',
+                  moderationMethod: 'groq',
+                  messageType: 'group'
+                }),
+                BlockedMessage.create({
+                  senderId,
+                  groupId,
+                  originalMessage: text,
+                  reason: 'Inappropriate language detected',
+                  moderationMethod: 'groq',
+                  messageType: 'group'
+                })
+              ]);
               
               // Increment toxic message count
               const User = require('../models/user.model');

@@ -78,7 +78,7 @@ exports.getDashboardStats = async (req, res) => {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
           blocked: { $sum: { $cond: [{ $eq: ['$action', 'blocked'] }, 1, 0] } },
-          rephrased: { $sum: { $cond: [{ $eq: ['$action', 'rephrased'] }, 1, 0] } },
+          rephrased: { $sum: { $cond: [{ $in: ['$action', ['rephrased', 'bypassed']] }, 1, 0] } },
           allowed: { $sum: { $cond: [{ $eq: ['$action', 'allowed'] }, 1, 0] } }
         }
       },
@@ -391,6 +391,7 @@ exports.getModerationLogs = async (req, res) => {
     }
     
     const total = await ModerationLog.countDocuments(query);
+    
     const logs = await ModerationLog.find(query)
       .populate('senderId', 'email fullName profilePic')
       .populate('receiverId', 'email fullName profilePic')
@@ -495,8 +496,6 @@ exports.bulkBlockUsers = async (req, res) => {
     const skippedCount = alreadyBlockedCount;
     const failedCount = userIds.length - blockedCount - skippedCount;
     
-    console.log(`[ADMIN ACTION] Bulk blocked ${blockedCount} users. Skipped ${skippedCount} (already blocked). Failed: ${failedCount}`);
-    
     res.json({ 
       success: true,
       message: 'Bulk block completed',
@@ -551,8 +550,6 @@ exports.bulkUnblockUsers = async (req, res) => {
     const skippedCount = alreadyUnblockedCount;
     const failedCount = userIds.length - unblockedCount - skippedCount;
     
-    console.log(`[ADMIN ACTION] Bulk unblocked ${unblockedCount} users. Skipped ${skippedCount} (already unblocked). Failed: ${failedCount}`);
-    
     res.json({ 
       success: true,
       message: 'Bulk unblock completed',
@@ -571,8 +568,6 @@ exports.resetToxicCount = async (req, res) => {
   try {
     const { userId } = req.params;
     
-    console.log(`[ADMIN] Resetting toxic count for user: ${userId}`);
-    
     const user = await User.findByIdAndUpdate(
       userId,
       { toxicMessageCount: 0 },
@@ -580,11 +575,8 @@ exports.resetToxicCount = async (req, res) => {
     ).select('-password');
     
     if (!user) {
-      console.log(`[ADMIN] User not found: ${userId}`);
       return res.status(404).json({ error: 'User not found' });
     }
-    
-    console.log(`[ADMIN] Toxic count reset successfully for ${user.email}, new count: ${user.toxicMessageCount}`);
     
     res.json({ 
       message: 'Toxic count reset successfully',

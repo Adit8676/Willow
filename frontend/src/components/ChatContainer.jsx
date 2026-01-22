@@ -156,6 +156,17 @@ const ChatContainer = () => {
             <div className="chat-image avatar">
               {isUserMessage ? (
                 <Avatar user={authUser} size="sm" isInChat={true} />
+              ) : selectedUser?.type === 'ai' ? (
+                <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                    <path d="M12 8V4H8"></path>
+                    <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                    <path d="M2 14h2"></path>
+                    <path d="M20 14h2"></path>
+                    <path d="M15 13v2"></path>
+                    <path d="M9 13v2"></path>
+                  </svg>
+                </div>
               ) : (
                 <Avatar user={selectedUser?.memberCount ? message.senderId : selectedUser} size="sm" isInChat={true} />
               )}
